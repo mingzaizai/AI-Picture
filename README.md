@@ -11,79 +11,64 @@
 
 ---
 
-## 🌟 核心特性
+## 📸 界面预览 (Interface Showcase)
 
-### 1. ✨ AI 魔法工具 (Magic Suite)
-利用最新的 **Gemini 2.5 Flash** 图像模型，PixelMind 提供了以往仅在云端专业软件中才有的功能：
-- **AI 背景重绘**：输入简单的文字描述，瞬间为您的主体切换到任何奇幻场景。
-- **智能换装**：精确识别人物轮廓，一键尝试不同的服饰风格。
-- **AI 智能建议**：自动分析照片的构图、曝光和色彩平衡，给出专业的修图方案。
+为了展示 PixelMind 的强大功能，请参考以下核心模块预览：
 
-### 2. ✂️ 交互式精准构图
-- **手动自由裁剪**：全新的交互式裁剪框，支持四个角与四条边的自由拉伸。
-- **预设比例吸附**：内置 1:1, 4:3, 16:9 等主流社交媒体比例。
-- **三分法辅助线**：帮助您遵循摄影黄金准则进行完美构图。
-
-### 3. 🛠️ 专业级批量处理
-- **一键队列化**：支持多图同时导入，批量应用缩放、格式转换和自动光影平衡。
-- **性能卓越**：利用浏览器硬件加速（WebGL），在大批量处理时依然保持流畅。
-
-### 4. 🔒 隐私隔离设计
-- **零服务器存储**：所有基础编辑（裁剪、滤镜、文字）均在浏览器 Canvas 中完成。
-- **安全 AI 调用**：仅在您请求 AI 功能时，通过安全通道传输加密图像片段。
+| 🎨 **专业精修 (Adjust)** | ✂️ **交互构图 (Crop)** | 🪄 **AI 魔法 (Magic)** |
+| :---: | :---: | :---: |
+| <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=600&h=400" width="100%" alt="精修模式" /> | <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600&h=400" width="100%" alt="构图模式" /> | <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600&h=400" width="100%" alt="AI 魔法" /> |
+| **实时滤镜与调色**<br/>支持亮度、对比度、饱和度、<br/>色相及多种专业滤镜调节。 | **交互式手动裁剪**<br/>全新的拖拽式裁剪框，支持<br/>自由拉伸与主流比例吸附。 | **Gemini 驱动增强**<br/>AI 背景重绘、智能换装<br/>以及深度的画面审美分析。 |
 
 ---
 
-## 📸 界面预览
+## 🌟 核心特性
 
-| 🎨 精修模式 | ✂️ 构图模式 | 🪄 魔法 AI |
-| :--- | :--- | :--- |
-| ![调节](https://via.placeholder.com/300x200/0f172a/f8fafc?text=Advanced+Filters) | ![裁剪](https://via.placeholder.com/300x200/0f172a/f8fafc?text=Interactive+Crop) | ![AI](https://via.placeholder.com/300x200/0f172a/f8fafc?text=AI+Inpainting) |
+### 1. ✨ AI 魔法工具 (Magic Suite)
+利用最新的 **Gemini 2.5 Flash** 图像模型：
+- **AI 背景重绘**：输入描述，瞬间切换场景。
+- **智能换装**：精确识别轮廓，一键更换服饰。
+- **AI 智能建议**：基于审美算法自动给出修图方案。
+
+### 2. ✂️ 交互式精准构图
+- **手动自由裁剪**：支持四个角与四条边的自由拉伸，带三分法辅助线。
+- **预设比例**：内置 1:1, 4:3, 16:9, 9:16 等主流比例。
+
+### 3. 🛠️ 专业级批量处理
+- **高性能架构**：利用 Canvas 硬件加速，批量处理不卡顿。
+- **一键导出**：支持 JPEG/PNG/WEBP 格式及其质量调节。
+
+### 4. 🔒 隐私隔离设计
+- **本地优先**：所有基础编辑均在浏览器本地完成，数据不上传云端。
 
 ---
 
 ## 🚀 技术栈
 
-- **核心框架**: React 19 (Hooks, Context API)
-- **样式方案**: Tailwind CSS (Dark Mode First)
-- **图标库**: Lucide React
-- **AI 引擎**: @google/genai (Gemini 2.5 Flash / Gemini 3 Flash Preview)
-- **图形处理**: 原生 HTML5 Canvas API
+- **Frontend**: React 19 + TypeScript + Tailwind CSS
+- **Icons**: Lucide React
+- **AI**: Google Gemini API (@google/genai)
+- **Engine**: HTML5 Canvas (Hardware Accelerated)
 
 ---
 
 ## 🛠️ 快速开始
 
-1. **配置 API Key**
-   本应用需要 Google Gemini API 密钥。请在 [Google AI Studio](https://aistudio.google.com/) 获取。
+1. **获取 API Key**
+   请在 [Google AI Studio](https://aistudio.google.com/) 获取密钥。
    
-2. **环境设置**
-   将您的密钥设置到环境变量中：
-   ```bash
-   process.env.API_KEY = "您的密钥"
-   ```
-
-3. **运行项目**
-   由于项目采用现代 ES Modules 设计，您只需要一个简单的本地静态文件服务器即可：
+2. **本地运行**
+   由于是纯静态前端项目，使用任何静态服务器即可：
    ```bash
    npx serve .
    ```
 
----
-
-## 🤝 贡献与反馈
-
-我们非常欢迎开发者参与贡献！无论是新增滤镜算法，还是优化 AI 提示词逻辑，您的每一个 PR 都会让 PixelMind 变得更好。
-
-- 提交 Bug 请前往 [Issues](https://github.com/)
-- 加入讨论 [Discussions](https://github.com/)
+3. **替换预览图**
+   您可以将自己运行时的截图放入 `/assets` 文件夹，并更新 README 中的图片路径。
 
 ---
 
-## ⚖️ 开源协议
-
-基于 **MIT License** 授权。
-
----
+## 🤝 贡献
+欢迎提交 PR 或 Issue。让我们共同打造最强隐私 AI 修图工具！
 
 <p align="center">Made with ❤️ by PixelMind Team</p>
