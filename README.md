@@ -1,75 +1,70 @@
 
 # 🎨 PixelMind - 隐私至上的 AI 本地图片编辑器
 
-[![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
-[![Gemini AI](https://img.shields.io/badge/Powered_by-Gemini_2.5_Flash-orange?logo=google-gemini)](https://ai.google.dev/)
-[![Privacy](https://img.shields.io/badge/Privacy-100%25_Local_Processing-green?logo=shieldcheck)](https://github.com/)
-[![UI Style](https://img.shields.io/badge/UI-Dark_Modern-1e293b)](https://github.com/)
-
-> **PixelMind** 是一款专为创作者打造的现代化、隐私友好的图片处理工具。它在浏览器本地运行强大的 Canvas 引擎，并集成 Google Gemini AI 进行智能分析与重绘。
-
----
-
-## 🖥️ 界面预览 (Main Interface)
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/your-username/your-repo-name/main/screenshot.png" width="100%" alt="PixelMind 主界面预览" />
-  <br>
-  <i>(提示：请将你的截图命名为 screenshot.png 放在根目录，并替换上方链接中的 username/repo-name)</i>
+<p align="left">
+  <img src="https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/Gemini_AI-Flash-orange?style=for-the-badge&logo=google-gemini" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Privacy-Local_Only-green?style=for-the-badge&logo=shieldcheck" alt="Privacy" />
 </p>
 
-### 🌌 核心视觉设计
-- **深色极简主义**：采用 `#0f172a` 极夜色调，减少视觉疲劳，突出图片主体。
-- **直观侧边栏**：左侧快速切换 **图库、编辑、批量、设置**。
-- **动态交互**：毛玻璃效果、流畅的过渡动画与响应式布局。
+> **PixelMind** 是一款专为创作者打造的现代化图片处理工具。它将强大的本地 Canvas 渲染引擎与 Google Gemini 的前沿 AI 技术深度融合，确保您的每一张创意素材都只留在您的本地硬盘。
 
 ---
 
-## 🛠️ 功能模块 (Modules)
-
-### 📁 1. 图片库 (Library)
-- **极简上传**：支持点击、拖拽上传。
-- **安全保障**：🛡️ **100% 本地处理**，绝不上传私密照片至服务器。
-- **多格式支持**：兼容 JPG, PNG, WEBP, HEIC 等主流格式。
-
-### 🎨 2. 高级编辑器 (Editor)
-- **专业调色**：亮度、对比度、饱和度、曝光、色相。
-- **智能分析**：点击 **AI 分析** 按钮，Gemini 将会给出专业的画面构图建议与技术优化方案。
-- **魔法工具**：AI 背景重绘、智能换装、文字水印。
-
-### 📦 3. 批量处理中心 (Batch)
-- **并行任务**：同时对数十张图片进行格式转换、质量压缩与尺寸调整。
-- **智能增强**：开启“自动光影平衡”，批量修复曝光不足的素材。
-
----
-
-## 🚀 技术架构 (Tech Stack)
-
-- **核心**：React 19 + TypeScript
-- **样式**：Tailwind CSS (定制深色主题)
-- **图标**：Lucide React
-- **AI 引擎**：Google Gemini 2.5 Flash / 3 Pro
-- **图形处理**：HTML5 Canvas (硬件加速渲染)
-
----
-
-## 📦 安装与运行
-
-1. **环境要求**：任何支持现代 ESM 的静态服务器。
-2. **快速启动**：
-   ```bash
-   # 克隆仓库
-   git clone https://github.com/your-username/pixelmind.git
-   # 启动服务
-   npx serve .
-   ```
-3. **API 配置**：在设置面板中填入您的 [Gemini API Key](https://aistudio.google.com/) 即可启用 AI 功能。
-
----
-
-## 🔒 隐私声明
-PixelMind 默认在客户端执行所有核心逻辑。除用户主动触发的 AI 请求外，没有任何数据流向云端。您的创意，只属于您的硬盘。
+## 📸 界面预览 (Interface Showcase)
 
 <p align="center">
-  Made with ✨ and ☕ by PixelMind Team
+  <img src="./screenshot.png" width="100%" alt="PixelMind 首页界面预览" style="border-radius: 12px; border: 1px solid #334155;" />
+  <br>
+  <i>(PixelMind 极简深色主界面：支持拖拽上传与 100% 本地处理)</i>
+</p>
+
+### 🛠️ 应用亮点
+- **🛡️ 100% 本地处理**：所有滤镜、裁剪和批量转换逻辑均在浏览器内核完成。
+- **🖼️ 广泛格式兼容**：原生支持 JPG, PNG, WEBP 以及苹果生态的 HEIC 格式。
+- **🪄 Gemini AI 魔法**：集成最新的 Gemini 2.5 系列模型，提供背景重绘与审美分析。
+
+---
+
+## 🌟 核心功能模块
+
+### 📁 图片库 (Library)
+- **极简交互**：支持文件拖拽、批量选择与实时预览。
+- **离线可用**：一旦加载，即使断开网络也可完成基础编辑工作。
+
+### 🎨 高级编辑器 (Professional Editor)
+- **光影精修**：亮度、对比度、饱和度、曝光等精准调节。
+- **交互构图**：带三分法辅助线的自由裁剪框，支持多种主流社交媒体比例。
+- **AI 智能中心**：
+  - **背景重绘**：一句话描述，瞬间改变照片氛围。
+  - **智能分析**：AI 自动识别画面瑕疵并给出专业调色建议。
+
+### 📦 批量处理中心 (Batch Processing)
+- **多任务并行**：一键对成百上千张图片进行格式转换与尺寸缩放。
+- **自动增强**：开启“智能平衡”模式，批量优化曝光与对比度。
+
+---
+
+## 🚀 快速启动
+
+1. **环境准备**：
+   项目采用纯前端 ESM 架构，您可以使用 `serve` 或任何现代浏览器直接运行。
+
+2. **本地运行**：
+   ```bash
+   # 如果安装了 npm
+   npx serve .
+   ```
+
+3. **配置 AI**：
+   点击应用内的 **“设置”** 按钮，填入您的 [Gemini API Key](https://aistudio.google.com/) 即可激活全部 AI 魔法功能。
+
+---
+
+## 🔒 隐私承诺
+
+我们深知隐私对创作者的重要性。PixelMind 不设后端服务器，不记录任何用户信息。您的图片、您的 API 密钥、您的编辑历史，均仅存储在您浏览器的本地存储空间内。
+
+<p align="center">
+  Built with ❤️ for Creators everywhere.
 </p>
