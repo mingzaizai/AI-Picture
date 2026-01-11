@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Upload, Image as ImageIcon, ShieldCheck } from 'lucide-react';
 
@@ -27,35 +26,36 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload }) => {
   }, [onUpload]);
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-3xl">
       <label
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          relative group cursor-pointer border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center transition-all duration-300
+          relative group cursor-pointer border-2 border-dashed rounded-[40px] p-16 flex flex-col items-center justify-center transition-all duration-500
           ${isDragging 
-            ? 'border-indigo-500 bg-indigo-500/10 scale-[1.02]' 
-            : 'border-slate-700 hover:border-slate-500 hover:bg-slate-800/50 bg-slate-900/50'}
+            ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01] shadow-[0_0_40px_rgba(99,102,241,0.1)]' 
+            : 'border-slate-700/50 hover:border-slate-500 hover:bg-slate-800/30 bg-slate-900/20'}
         `}
       >
-        <div className="mb-6 p-6 rounded-full bg-slate-800 group-hover:bg-indigo-600/20 group-hover:text-indigo-400 transition-colors">
-          <Upload className="w-12 h-12 text-slate-400 group-hover:text-indigo-400" />
+        <div className="mb-8 p-6 rounded-full bg-slate-800/50 group-hover:bg-indigo-600/20 transition-all duration-500 transform group-hover:scale-110">
+          <Upload className="w-14 h-14 text-slate-500 group-hover:text-indigo-400" />
         </div>
         
-        <h2 className="text-2xl font-bold text-slate-200 mb-2">上传图片</h2>
-        <p className="text-slate-400 text-center mb-6 max-w-xs">
-          将文件拖拽至此处，或点击浏览本地存储
+        <h2 className="text-3xl font-bold text-slate-100 mb-3 tracking-tight">上传图片</h2>
+        <p className="text-slate-400 text-center mb-10 max-w-sm text-sm leading-relaxed">
+          将文件拖拽至此处，或点击浏览本地存储。<br/>
+          支持 JPG, PNG, WEBP 及 HEIC 格式。
         </p>
 
-        <div className="flex gap-4 mb-8">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-[11px] font-semibold text-slate-400 border border-slate-700">
-            <ShieldCheck className="w-3 h-3 text-green-500" />
+        <div className="flex gap-4 mb-10">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 text-[11px] font-bold text-slate-400 border border-slate-700/50">
+            <ShieldCheck className="w-3.5 h-3.5 text-green-500/80" />
             100% 本地处理
           </div>
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-[11px] font-semibold text-slate-400 border border-slate-700">
-            <ImageIcon className="w-3 h-3 text-indigo-400" />
-            支持 JPG, PNG, WEBP, HEIC
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 text-[11px] font-bold text-slate-400 border border-slate-700/50">
+            <ImageIcon className="w-3.5 h-3.5 text-indigo-400/80" />
+            隐私至上
           </div>
         </div>
 
@@ -69,8 +69,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload }) => {
           }}
         />
         
-        {/* 将 button 替换为 div，避免拦截 label 的默认触发行为 */}
-        <div className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl shadow-indigo-600/20 active:scale-95">
+        <div className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-bold transition-all shadow-2xl shadow-indigo-600/20 active:scale-95 text-sm tracking-widest uppercase">
           选择文件
         </div>
       </label>

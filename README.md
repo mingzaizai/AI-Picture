@@ -1,4 +1,3 @@
-
 # 🎨 PixelMind - 隐私至上的 AI 本地图片编辑器
 
 <p align="left">
@@ -14,15 +13,17 @@
 ## 📸 界面预览 (Interface Showcase)
 
 <p align="center">
-  <img src="./screenshot.png" width="100%" alt="PixelMind 首页界面预览" style="border-radius: 12px; border: 1px solid #334155;" />
+  <img src="screenshot.png" width="100%" alt="PixelMind 首页界面预览" style="border-radius: 12px; border: 1px solid #334155;" />
   <br>
   <i>(PixelMind 极简深色主界面：支持拖拽上传与 100% 本地处理)</i>
 </p>
 
+> **💡 提示**：若图片无法显示，请检查仓库根目录下文件名是否精确为 `screenshot.png`（注意大小写需完全一致）。
+
 ### 🛠️ 应用亮点
-- **🛡️ 100% 本地处理**：所有滤镜、裁剪和批量转换逻辑均在浏览器内核完成。
+- **🛡️ 100% 本地处理**：所有滤镜、裁剪和批量转换逻辑均在浏览器内核完成，无后端上传。
 - **🖼️ 广泛格式兼容**：原生支持 JPG, PNG, WEBP 以及苹果生态的 HEIC 格式。
-- **🪄 Gemini AI 魔法**：集成最新的 Gemini 2.5 系列模型，提供背景重绘与审美分析。
+- **🪄 Gemini AI 魔法**：集成最新的 Gemini 2.5 系列模型，提供背景重绘、智能换装与审美分析。
 
 ---
 
@@ -30,11 +31,12 @@
 
 ### 📁 图片库 (Library)
 - **极简交互**：支持文件拖拽、批量选择与实时预览。
-- **离线可用**：一旦加载，即使断开网络也可完成基础编辑工作。
+- **离线可用**：完全基于 Web Worker 处理，无网状态依然强悍。
 
 ### 🎨 高级编辑器 (Professional Editor)
 - **光影精修**：亮度、对比度、饱和度、曝光等精准调节。
-- **交互构图**：带三分法辅助线的自由裁剪框，支持多种主流社交媒体比例。
+- **拾色器**：支持画布像素级精准取色，一键获取 HEX 代码。
+- **撤销系统**：多步编辑历史记录，随时回退错误操作。
 - **AI 智能中心**：
   - **背景重绘**：一句话描述，瞬间改变照片氛围。
   - **智能分析**：AI 自动识别画面瑕疵并给出专业调色建议。
@@ -52,12 +54,12 @@
 
 2. **本地运行**：
    ```bash
-   # 如果安装了 npm
+   # 使用 npx 快速启动
    npx serve .
    ```
 
 3. **配置 AI**：
-   点击应用内的 **“设置”** 按钮，填入您的 [Gemini API Key](https://aistudio.google.com/) 即可激活全部 AI 魔法功能。
+   点击应用内的 **“设置”** 按钮，填入您的 [Gemini API Key](https://aistudio.google.com/) 即可激活全部 AI 魔法。
 
 ---
 
