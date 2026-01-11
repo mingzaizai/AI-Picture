@@ -34,7 +34,7 @@ const SettingsView: React.FC = () => {
               <HardDrive className="w-6 h-6 text-slate-400" />
               <div>
                 <p className="text-sm font-bold text-white">本地缓存</p>
-                <p className="text-xs text-slate-400">管理浏览器为 PixelMind 预留的临时空间</p>
+                <p className="text-xs text-slate-400">管理浏览器为 AI Picture 预留的临时空间</p>
               </div>
             </div>
             <button className="px-4 py-2 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 text-slate-200 rounded-lg text-xs font-bold transition-all border border-slate-600">
@@ -47,10 +47,10 @@ const SettingsView: React.FC = () => {
           <div className="flex flex-col md:flex-row gap-8 justify-between text-slate-500">
             <div className="space-y-2">
               <p className="text-sm font-bold text-slate-400 flex items-center gap-2">
-                <Info className="w-4 h-4" /> PixelMind v1.2.0
+                <span className="flex items-center gap-2"><Info className="w-4 h-4" /> AI Picture v1.2.0</span>
               </p>
               <p className="text-xs max-w-xs leading-relaxed">
-                一款由世界级工程师打造的高性能、隐私友好的本地图片处理工具。
+                一款由专业级工程师打造的高性能、隐私友好的本地图片处理工具。
               </p>
             </div>
             <div className="flex gap-6">

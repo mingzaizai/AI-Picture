@@ -1,4 +1,4 @@
-# 🎨 PixelMind - 隐私至上的 AI 本地图片编辑器
+# 🎨 AI Picture - 隐私至上的 AI 本地图片编辑器
 
 <p align="left">
   <img src="https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react" alt="React" />
@@ -6,16 +6,16 @@
   <img src="https://img.shields.io/badge/Privacy-Local_Only-green?style=for-the-badge&logo=shieldcheck" alt="Privacy" />
 </p>
 
-> **PixelMind** 是一款专为创作者打造的现代化图片处理工具。它将强大的本地 Canvas 渲染引擎与 Google Gemini 的前沿 AI 技术深度融合，确保您的每一张创意素材都只留在您的本地硬盘。
+> **AI Picture** 是一款专为创作者打造的现代化图片处理工具。它将强大的本地 Canvas 渲染引擎与 Google Gemini 的前沿 AI 技术深度融合，确保您的每一张创意素材都只留在您的本地硬盘。
 
 ---
 
 ## 📸 界面预览 (Interface Showcase)
 
 <p align="center">
-  <img src="screenshot.png" width="100%" alt="PixelMind 首页界面预览" style="border-radius: 12px; border: 1px solid #334155;" />
+  <img src="screenshot.png" width="100%" alt="AI Picture 首页界面预览" style="border-radius: 12px; border: 1px solid #334155;" />
   <br>
-  <i>(PixelMind 极简深色主界面：支持拖拽上传与 100% 本地处理)</i>
+  <i>(AI Picture 极简深色主界面：支持拖拽上传与 100% 本地处理)</i>
 </p>
 
 > **💡 提示**：若图片无法显示，请检查仓库根目录下文件名是否精确为 `screenshot.png`（注意大小写需完全一致）。
@@ -65,7 +65,7 @@
 
 ## 🔒 隐私承诺
 
-我们深知隐私对创作者的重要性。PixelMind 不设后端服务器，不记录任何用户信息。您的图片、您的 API 密钥、您的编辑历史，均仅存储在您浏览器的本地存储空间内。
+我们深知隐私对创作者的重要性。AI Picture 不设后端服务器，不记录任何用户信息。您的图片、您的 API 密钥、您的编辑历史，均仅存储在您浏览器的本地存储空间内。
 
 <p align="center">
   Built with ❤️ for Creators everywhere.

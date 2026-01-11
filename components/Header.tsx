@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ mode, onExport, canExport, imagesCount 
       case AppMode.LIBRARY: return '图片库';
       case AppMode.EDITOR: return '高级编辑器';
       case AppMode.BATCH: return '批量处理中心';
-      default: return 'PixelMind';
+      default: return 'AI Picture';
     }
   };
 

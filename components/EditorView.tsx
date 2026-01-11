@@ -352,7 +352,7 @@ const EditorView: React.FC<EditorViewProps> = ({ image, onClose }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement('a');
-    link.download = `pixelmind_${image.file.name}`;
+    link.download = `aipicture_${image.file.name}`;
     link.href = canvas.toDataURL('image/jpeg', 0.95);
     link.click();
   };
