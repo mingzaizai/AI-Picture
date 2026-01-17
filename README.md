@@ -13,19 +13,19 @@
 ## 📸 界面预览 (Interface Showcase)
 
 <p align="center">
-  <img src="1.png" width="100%" alt="AI Picture 首页界面" style="border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;" />
+  <img src="https://raw.githubusercontent.com/mingzaizai/AI-Picture/main/1.png" width="100%" alt="AI Picture 首页界面" style="border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;" />
   <br>
   <i>(图 1：AI Picture 极简深色主界面 - 支持拖拽上传与 100% 本地隐私处理)</i>
 </p>
 
 <p align="center">
-  <img src="2.png" width="100%" alt="AI Picture 编辑器界面" style="border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;" />
+  <img src="https://raw.githubusercontent.com/mingzaizai/AI-Picture/main/2.png" width="100%" alt="AI Picture 编辑器界面" style="border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;" />
   <br>
   <i>(图 2：高级编辑器模式 - 包含实时滤镜预览、光影微调及 AI 魔法工具)</i>
 </p>
 
 <p align="center">
-  <img src="3.png" width="100%" alt="AI Picture 批量处理与分析" style="border-radius: 12px; border: 1px solid #334155;" />
+  <img src="https://raw.githubusercontent.com/mingzaizai/AI-Picture/main/3.png" width="100%" alt="AI Picture 批量处理与分析" style="border-radius: 12px; border: 1px solid #334155;" />
   <br>
   <i>(图 3：AI 智能分析与批量处理中心 - 高效率完成专业级图像优化)</i>
 </p>
