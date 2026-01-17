@@ -13,17 +13,29 @@
 ## 📸 界面预览 (Interface Showcase)
 
 <p align="center">
-  <img src="screenshot.png" width="100%" alt="AI Picture 首页界面预览" style="border-radius: 12px; border: 1px solid #334155;" />
+  <img src="1.png" width="100%" alt="AI Picture 首页界面" style="border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;" />
   <br>
-  <i>(AI Picture 极简深色主界面：支持拖拽上传与 100% 本地处理)</i>
+  <i>(图 1：AI Picture 极简深色主界面 - 支持拖拽上传与 100% 本地隐私处理)</i>
 </p>
 
-> **💡 提示**：若图片无法显示，请检查仓库根目录下文件名是否精确为 `screenshot.png`（注意大小写需完全一致）。
+<p align="center">
+  <img src="2.png" width="100%" alt="AI Picture 编辑器界面" style="border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;" />
+  <br>
+  <i>(图 2：高级编辑器模式 - 包含实时滤镜预览、光影微调及 AI 魔法工具)</i>
+</p>
+
+<p align="center">
+  <img src="3.png" width="100%" alt="AI Picture 批量处理与分析" style="border-radius: 12px; border: 1px solid #334155;" />
+  <br>
+  <i>(图 3：AI 智能分析与批量处理中心 - 高效率完成专业级图像优化)</i>
+</p>
+
+---
 
 ### 🛠️ 应用亮点
 - **🛡️ 100% 本地处理**：所有滤镜、裁剪和批量转换逻辑均在浏览器内核完成，无后端上传。
 - **🖼️ 广泛格式兼容**：原生支持 JPG, PNG, WEBP 以及苹果生态的 HEIC 格式。
-- **🪄 Gemini AI 魔法**：集成最新的 Gemini 2.5 系列模型，提供背景重绘、智能换装与审美分析。
+- **🪄 Gemini AI 魔法**：集成最新的 Gemini 2.5 系列模型，提供背景重绘、智能增强与审美分析。
 
 ---
 
@@ -35,10 +47,12 @@
 
 ### 🎨 高级编辑器 (Professional Editor)
 - **光影精修**：亮度、对比度、饱和度、曝光等精准调节。
+- **大师滤镜**：预设多种电影感、复古、冷暖色调滤镜，支持实时画面预览。
 - **拾色器**：支持画布像素级精准取色，一键获取 HEX 代码。
 - **撤销系统**：多步编辑历史记录，随时回退错误操作。
 - **AI 智能中心**：
-  - **背景重绘**：一句话描述，瞬间改变照片氛围。
+  - **背景重绘/创意生成**：一句话描述，瞬间改变照片氛围或生成全新素材。
+  - **高清增强**：利用 AI 算法重建丢失细节，锐化模糊画面。
   - **智能分析**：AI 自动识别画面瑕疵并给出专业调色建议。
 
 ### 📦 批量处理中心 (Batch Processing)
@@ -59,7 +73,7 @@
    ```
 
 3. **配置 AI**：
-   点击应用内的 **“设置”** 按钮，填入您的 [Gemini API Key](https://aistudio.google.com/) 即可激活全部 AI 魔法。
+   点击应用内的 **“设置”** 按钮，确保环境配置了有效的 [Gemini API Key](https://aistudio.google.com/) 即可激活全部 AI 魔法。
 
 ---
 
