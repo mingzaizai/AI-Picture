@@ -7,50 +7,28 @@ import {
   FlipVertical, 
   Save, 
   RefreshCcw,
-  Scissors,
   Palette,
   Undo2,
-  Type,
-  Plus,
-  Trash2,
   Sparkles,
   Loader2,
   Shirt,
   Check,
-  Crop as CropIcon,
-  Move,
   Wand2,
   Pipette,
   Copy,
-  CheckCircle2
+  CheckCircle2,
+  ImagePlus,
+  Zap,
+  Grid
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { ImageData, ImageFilters, ImageTransform } from '../types';
-import { DEFAULT_FILTERS, DEFAULT_TRANSFORM, ASPECT_RATIOS } from '../constants';
+import { DEFAULT_FILTERS, DEFAULT_TRANSFORM, FILTER_PRESETS } from '../constants';
 import AIAnalysisPanel from './AIAnalysisPanel';
-
-interface TextOverlay {
-  id: string;
-  content: string;
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  rotation: number;
-  align: 'left' | 'center' | 'right';
-}
-
-interface CropBox {
-  x: number; 
-  y: number;
-  width: number;
-  height: number;
-}
 
 interface EditorState {
   filters: ImageFilters;
   transform: ImageTransform;
-  texts: TextOverlay[];
 }
 
 interface EditorViewProps {
@@ -61,23 +39,13 @@ interface EditorViewProps {
 const EditorView: React.FC<EditorViewProps> = ({ image, onClose }) => {
   const [filters, setFilters] = useState<ImageFilters>(DEFAULT_FILTERS);
   const [transform, setTransform] = useState<ImageTransform>(DEFAULT_TRANSFORM);
-  const [texts, setTexts] = useState<TextOverlay[]>([]);
-  
-  // 历史记录状态用于撤销
   const [history, setHistory] = useState<EditorState[]>([]);
-  
-  const [activeTab, setActiveTab] = useState<'adjust' | 'crop' | 'text' | 'magic' | 'ai' | 'color'>('adjust');
+  const [activeTab, setActiveTab] = useState<'adjust' | 'presets' | 'magic' | 'color' | 'ai'>('adjust');
   const [isMagicProcessing, setIsMagicProcessing] = useState(false);
-  const [bgPrompt, setBgPrompt] = useState('');
-  const [outfitPrompt, setOutfitPrompt] = useState('');
-  
-  // 拾色相关状态
+  const [magicPrompt, setMagicPrompt] = useState('');
+  const [genPrompt, setGenPrompt] = useState('');
   const [pickedColor, setPickedColor] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState(false);
-  
-  // 裁剪相关状态
-  const [cropBox, setCropBox] = useState<CropBox>({ x: 10, y: 10, width: 80, height: 80 });
-  const [isDragging, setIsDragging] = useState<string | null>(null);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -93,28 +61,28 @@ const EditorView: React.FC<EditorViewProps> = ({ image, onClose }) => {
     };
   }, [image]);
 
-  // 记录当前状态到历史记录
   const saveToHistory = useCallback(() => {
-    setHistory(prev => {
-      const newState: EditorState = {
-        filters: { ...filters },
-        transform: { ...transform },
-        texts: [...texts]
-      };
-      // 限制历史记录步数，防止内存占用过大
-      const updated = [...prev, newState];
-      return updated.slice(-20);
-    });
-  }, [filters, transform, texts]);
+    setHistory(prev => [...prev.slice(-19), { filters: { ...filters }, transform: { ...transform } }]);
+  }, [filters, transform]);
 
-  // 撤销功能
   const handleUndo = () => {
     if (history.length === 0) return;
-    const previousState = history[history.length - 1];
-    setFilters(previousState.filters);
-    setTransform(previousState.transform);
-    setTexts(previousState.texts);
+    const last = history[history.length - 1];
+    setFilters(last.filters);
+    setTransform(last.transform);
     setHistory(prev => prev.slice(0, -1));
+  };
+
+  const getFilterString = (f: ImageFilters) => {
+    return `
+      brightness(${f.brightness}%) 
+      contrast(${f.contrast}%) 
+      saturate(${f.saturation}%) 
+      blur(${f.blur}px) 
+      sepia(${f.sepia}%) 
+      grayscale(${f.grayscale}%)
+      hue-rotate(${f.hueRotate}deg)
+    `.trim();
   };
 
   const renderImage = useCallback(() => {
@@ -135,216 +103,63 @@ const EditorView: React.FC<EditorViewProps> = ({ image, onClose }) => {
     ctx.rotate((transform.rotate * Math.PI) / 180);
     ctx.scale(transform.scaleX, transform.scaleY);
     
-    const filterStr = `
-      brightness(${filters.brightness}%) 
-      contrast(${filters.contrast}%) 
-      saturate(${filters.saturation}%) 
-      blur(${filters.blur}px) 
-      sepia(${filters.sepia}%) 
-      grayscale(${filters.grayscale}%)
-      hue-rotate(${filters.hueRotate}deg)
-    `.trim();
-    
-    ctx.filter = filterStr;
+    ctx.filter = getFilterString(filters);
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
     ctx.restore();
+  }, [filters, transform]);
 
-    texts.forEach(t => {
-      ctx.save();
-      const posX = (t.x / 100) * canvas.width;
-      const posY = (t.y / 100) * canvas.height;
-      ctx.translate(posX, posY);
-      ctx.rotate((t.rotation * Math.PI) / 180);
-      ctx.fillStyle = t.color;
-      const responsiveSize = (t.size * canvas.height) / 1000;
-      ctx.font = `bold ${responsiveSize}px "Inter", "Microsoft YaHei"`;
-      ctx.textAlign = t.align;
-      ctx.textBaseline = 'middle';
-      ctx.fillText(t.content, 0, 0);
-      ctx.restore();
-    });
-  }, [filters, transform, texts]);
+  useEffect(() => { renderImage(); }, [renderImage]);
 
-  useEffect(() => {
-    renderImage();
-  }, [renderImage]);
-
-  // 拾色逻辑
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (activeTab !== 'color' || isMagicProcessing) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-    
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
-    
-    const pixel = ctx.getImageData(x, y, 1, 1).data;
-    const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1).toUpperCase()}`;
-    setPickedColor(hex);
-  };
-
-  const copyColorToClipboard = () => {
-    if (!pickedColor) return;
-    navigator.clipboard.writeText(pickedColor);
-    setCopyFeedback(true);
-    setTimeout(() => setCopyFeedback(false), 2000);
-  };
-
-  const applyCrop = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
+  const applyPreset = (presetValues: ImageFilters) => {
     saveToHistory();
-    setIsMagicProcessing(true);
-    setTimeout(() => {
-      const sourceWidth = canvas.width;
-      const sourceHeight = canvas.height;
-      const cropX = (cropBox.x / 100) * sourceWidth;
-      const cropY = (cropBox.y / 100) * sourceHeight;
-      const cropW = (cropBox.width / 100) * sourceWidth;
-      const cropH = (cropBox.height / 100) * sourceHeight;
-
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = cropW;
-      tempCanvas.height = cropH;
-      const tempCtx = tempCanvas.getContext('2d');
-      if (tempCtx) {
-        tempCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-        const dataUrl = tempCanvas.toDataURL('image/png');
-        const newImg = new Image();
-        newImg.src = dataUrl;
-        newImg.onload = () => {
-          imgRef.current = newImg;
-          setTransform(DEFAULT_TRANSFORM);
-          setCropBox({ x: 10, y: 10, width: 80, height: 80 });
-          setIsMagicProcessing(false);
-          renderImage();
-        };
-      }
-    }, 300);
+    setFilters({ ...presetValues });
   };
 
-  const handleMouseDown = (e: React.MouseEvent, handle: string) => {
-    e.stopPropagation();
-    setIsDragging(handle);
-  };
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || activeTab !== 'crop' || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    setCropBox(prev => {
-      let next = { ...prev };
-      const minSize = 5;
-      if (isDragging === 'nw') {
-        next.width = prev.x + prev.width - x;
-        next.height = prev.y + prev.height - y;
-        next.x = x;
-        next.y = y;
-      } else if (isDragging === 'se') {
-        next.width = x - prev.x;
-        next.height = y - prev.y;
-      } else if (isDragging === 'ne') {
-        next.width = x - prev.x;
-        next.height = prev.y + prev.height - y;
-        next.y = y;
-      } else if (isDragging === 'sw') {
-        next.width = prev.x + prev.width - x;
-        next.height = y - prev.y;
-        next.x = x;
-      }
-      next.x = Math.max(0, Math.min(next.x, 100 - minSize));
-      next.y = Math.max(0, Math.min(next.y, 100 - minSize));
-      next.width = Math.max(minSize, Math.min(next.width, 100 - next.x));
-      next.height = Math.max(minSize, Math.min(next.height, 100 - next.y));
-      return next;
-    });
-  }, [isDragging, activeTab]);
-
-  useEffect(() => {
-    const endDrag = () => setIsDragging(null);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', endDrag);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', endDrag);
-    };
-  }, [handleMouseMove]);
-
-  const replaceBackground = async () => {
-    if (!bgPrompt.trim()) return;
-    saveToHistory();
+  const handleAIAction = async (prompt: string, actionType: 'edit' | 'generate' | 'upscale') => {
+    if (!prompt.trim() && actionType !== 'upscale') return;
     setIsMagicProcessing(true);
     try {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const base64Data = canvas.toDataURL('image/png').split(',')[1];
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-          parts: [
-            { inlineData: { mimeType: 'image/png', data: base64Data } },
-            { text: `Background replacement prompt: ${bgPrompt}` }
-          ]
-        }
-      });
-      handleAIResponse(response);
-    } catch (error) {
-      console.error(error);
-      alert("AI 魔法失败了，请稍后再试。");
-    } finally {
-      setIsMagicProcessing(false);
-    }
-  };
+      let response;
 
-  const changeOutfit = async () => {
-    if (!outfitPrompt.trim()) return;
-    saveToHistory();
-    setIsMagicProcessing(true);
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const base64Data = canvas.toDataURL('image/png').split(',')[1];
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-          parts: [
-            { inlineData: { mimeType: 'image/png', data: base64Data } },
-            { text: `Change the clothing to: ${outfitPrompt}. Keep body and face unchanged.` }
-          ]
-        }
-      });
-      handleAIResponse(response);
-    } catch (error) {
-      console.error(error);
-      alert("换装失败。");
-    } finally {
-      setIsMagicProcessing(false);
-    }
-  };
-
-  const handleAIResponse = (response: any) => {
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        const newImg = new Image();
-        newImg.src = `data:image/png;base64,${part.inlineData.data}`;
-        newImg.onload = () => {
-          imgRef.current = newImg;
-          setBgPrompt('');
-          setOutfitPrompt('');
-          renderImage();
-        };
-        break;
+      if (actionType === 'generate') {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash-image',
+          contents: { parts: [{ text: prompt }] },
+          config: { imageConfig: { aspectRatio: "1:1" } }
+        });
+      } else {
+        const canvas = canvasRef.current;
+        const base64Data = canvas?.toDataURL('image/png').split(',')[1];
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash-image',
+          contents: {
+            parts: [
+              { inlineData: { mimeType: 'image/png', data: base64Data || '' } },
+              { text: actionType === 'upscale' ? "Please enhance the quality and details of this image, make it sharper and clearer." : prompt }
+            ]
+          }
+        });
       }
+
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          const newImg = new Image();
+          newImg.src = `data:image/png;base64,${part.inlineData.data}`;
+          newImg.onload = () => {
+            imgRef.current = newImg;
+            if (actionType === 'generate') setGenPrompt('');
+            else setMagicPrompt('');
+            renderImage();
+          };
+          break;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert("AI 操作失败，请检查 API Key 或网络。");
+    } finally {
+      setIsMagicProcessing(false);
     }
   };
 
@@ -352,165 +167,149 @@ const EditorView: React.FC<EditorViewProps> = ({ image, onClose }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement('a');
-    link.download = `aipicture_${image.file.name}`;
+    link.download = `aipicture_${Date.now()}.jpg`;
     link.href = canvas.toDataURL('image/jpeg', 0.95);
     link.click();
   };
 
   return (
     <div className="h-full flex flex-col md:flex-row bg-[#0a0f1d]">
-      <div className="flex-1 relative bg-slate-900 overflow-hidden flex items-center justify-center p-8 group">
-        <div ref={containerRef} className="relative inline-block transition-all duration-300">
+      <div className="flex-1 relative bg-slate-900 overflow-hidden flex items-center justify-center p-8">
+        <div ref={containerRef} className="relative inline-block">
           <canvas 
             ref={canvasRef} 
-            onClick={handleCanvasClick}
+            onClick={(e) => {
+              if (activeTab !== 'color') return;
+              const rect = canvasRef.current?.getBoundingClientRect();
+              if (!rect || !canvasRef.current) return;
+              const x = ((e.clientX - rect.left) / rect.width) * canvasRef.current.width;
+              const y = ((e.clientY - rect.top) / rect.height) * canvasRef.current.height;
+              const ctx = canvasRef.current.getContext('2d');
+              const pixel = ctx?.getImageData(x, y, 1, 1).data;
+              if (pixel) {
+                const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1).toUpperCase()}`;
+                setPickedColor(hex);
+              }
+            }}
             className={`max-w-full max-h-[80vh] object-contain shadow-2xl transition-all duration-500 
               ${isMagicProcessing ? 'opacity-30 blur-sm scale-95' : 'opacity-100'}
               ${activeTab === 'color' ? 'cursor-crosshair' : 'cursor-default'}
             `} 
           />
-          
-          {activeTab === 'crop' && !isMagicProcessing && (
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-0 bg-black/60" style={{ clipPath: `polygon(0% 0%, 0% 100%, ${cropBox.x}% 100%, ${cropBox.x}% ${cropBox.y}%, ${cropBox.x + cropBox.width}% ${cropBox.y}%, ${cropBox.x + cropBox.width}% ${cropBox.y + cropBox.height}%, ${cropBox.x}% ${cropBox.y + cropBox.height}%, ${cropBox.x}% 100%, 100% 100%, 100% 0%)` }} />
-              <div 
-                className="absolute border-2 border-indigo-400 pointer-events-auto cursor-move shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-                style={{ left: `${cropBox.x}%`, top: `${cropBox.y}%`, width: `${cropBox.width}%`, height: `${cropBox.height}%` }}
-                onMouseDown={(e) => handleMouseDown(e, 'move')}
-              >
-                <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
-                  {[...Array(9)].map((_, i) => <div key={i} className="border border-white/10" />)}
-                </div>
-                <div className="absolute -top-1.5 -left-1.5 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-nw-resize shadow-lg" onMouseDown={(e) => handleMouseDown(e, 'nw')} />
-                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-ne-resize shadow-lg" onMouseDown={(e) => handleMouseDown(e, 'ne')} />
-                <div className="absolute -bottom-1.5 -left-1.5 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-sw-resize shadow-lg" onMouseDown={(e) => handleMouseDown(e, 'sw')} />
-                <div className="absolute -bottom-1.5 -right-1.5 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full cursor-se-resize shadow-lg" onMouseDown={(e) => handleMouseDown(e, 'se')} />
-              </div>
-            </div>
-          )}
-
           {isMagicProcessing && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white">
               <Loader2 className="w-12 h-12 animate-spin text-indigo-500" />
-              <p className="text-xs font-bold tracking-widest animate-pulse">魔法处理中...</p>
+              <p className="text-xs font-bold tracking-widest animate-pulse uppercase">AI 魔法处理中...</p>
             </div>
           )}
         </div>
         
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 flex gap-1.5 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-700/50 shadow-lg">
-          <button 
-            onClick={handleUndo} 
-            disabled={history.length === 0}
-            className={`flex items-center gap-2 px-3 py-1 rounded-md transition-all text-xs font-bold
-              ${history.length > 0 ? 'text-indigo-400 hover:bg-indigo-400/10' : 'text-slate-600 cursor-not-allowed'}
-            `}
-          >
-            <Undo2 className="w-4 h-4" /> 撤销
-          </button>
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 flex gap-1.5 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-700/50 shadow-lg z-20">
+          <button onClick={handleUndo} disabled={history.length === 0} className={`flex items-center gap-2 px-3 py-1 rounded-md text-xs font-bold ${history.length > 0 ? 'text-indigo-400 hover:bg-indigo-400/10' : 'text-slate-600 cursor-not-allowed'}`}><Undo2 className="w-4 h-4" /> 撤销</button>
           <div className="w-px bg-slate-700 mx-1.5" />
-          <button 
-            onClick={() => { 
-              saveToHistory();
-              setFilters(DEFAULT_FILTERS); 
-              setTransform(DEFAULT_TRANSFORM); 
-            }} 
-            className="flex items-center gap-2 px-3 py-1 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-md transition-all text-xs font-bold"
-          >
-            <RefreshCcw className="w-4 h-4" /> 重置
-          </button>
+          <button onClick={() => { saveToHistory(); setFilters(DEFAULT_FILTERS); setTransform(DEFAULT_TRANSFORM); }} className="flex items-center gap-2 px-3 py-1 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-md text-xs font-bold transition-all"><RefreshCcw className="w-4 h-4" /> 重置</button>
         </div>
 
-        <button onClick={onClose} className="absolute top-6 left-6 p-2 bg-slate-900/80 backdrop-blur-md text-slate-400 hover:text-white rounded-lg border border-slate-700/50 shadow-lg"><X className="w-5 h-5" /></button>
-        <button onClick={saveLocal} className="absolute bottom-6 right-6 flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-xl shadow-indigo-600/30 transition-all active:scale-95"><Save className="w-5 h-5" /> 导出图片</button>
+        <button onClick={onClose} className="absolute top-6 left-6 p-2 bg-slate-900/80 backdrop-blur-md text-slate-400 hover:text-white rounded-lg border border-slate-700/50 transition-all z-20"><X className="w-5 h-5" /></button>
+        <button onClick={saveLocal} className="absolute bottom-6 right-6 flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-xl shadow-indigo-600/30 transition-all active:scale-95 z-20"><Save className="w-5 h-5" /> 导出图片</button>
       </div>
 
       <div className="w-full md:w-80 border-l border-slate-800 bg-[#0f172a] flex flex-col shrink-0">
         <div className="flex border-b border-slate-800 overflow-x-auto no-scrollbar">
-          <TabButton active={activeTab === 'adjust'} onClick={() => setActiveTab('adjust')} icon={<Palette />} label="精修" />
-          <TabButton active={activeTab === 'crop'} onClick={() => setActiveTab('crop')} icon={<Scissors />} label="构图" />
-          <TabButton active={activeTab === 'color'} onClick={() => setActiveTab('color')} icon={<Pipette />} label="拾色" />
+          <TabButton active={activeTab === 'adjust'} onClick={() => setActiveTab('adjust')} icon={<Palette />} label="微调" />
+          <TabButton active={activeTab === 'presets'} onClick={() => setActiveTab('presets')} icon={<Grid />} label="模板" />
           <TabButton active={activeTab === 'magic'} onClick={() => setActiveTab('magic')} icon={<Sparkles />} label="魔法" />
-          <TabButton active={activeTab === 'ai'} onClick={() => setActiveTab('ai')} icon={<Wand2 />} label="AI 分析" />
+          <TabButton active={activeTab === 'color'} onClick={() => setActiveTab('color')} icon={<Pipette />} label="取色" />
+          <TabButton active={activeTab === 'ai'} onClick={() => setActiveTab('ai')} icon={<Wand2 />} label="分析" />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
           {activeTab === 'adjust' && (
-            <div className="space-y-8">
+            <div className="space-y-6">
               <ControlSection title="光影调节">
                 <Slider label="亮度" value={filters.brightness} min={0} max={200} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, brightness: v }))} />
                 <Slider label="对比度" value={filters.contrast} min={0} max={200} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, contrast: v }))} />
+                <Slider label="曝光度" value={filters.exposure} min={-100} max={100} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, exposure: v }))} />
               </ControlSection>
-              <ControlSection title="色彩调节">
+              <ControlSection title="风格倾向">
                 <Slider label="饱和度" value={filters.saturation} min={0} max={200} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, saturation: v }))} />
-                <Slider label="色相" value={filters.hueRotate} min={0} max={360} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, hueRotate: v }))} />
+                <Slider label="怀旧色" value={filters.sepia} min={0} max={100} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, sepia: v }))} />
+                <Slider label="黑白色" value={filters.grayscale} min={0} max={100} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, grayscale: v }))} />
+                <Slider label="色相旋转" value={filters.hueRotate} min={0} max={360} onStart={saveToHistory} onChange={v => setFilters(p => ({ ...p, hueRotate: v }))} />
               </ControlSection>
-            </div>
-          )}
-
-          {activeTab === 'crop' && (
-            <div className="space-y-8">
-              <ControlSection title="几何调节">
+              <ControlSection title="变换与矫正">
                 <div className="grid grid-cols-3 gap-3">
                   <TransformButton onClick={() => { saveToHistory(); setTransform(p => ({ ...p, rotate: (p.rotate + 90) % 360 })); }} icon={<RotateCw />} label="旋转" />
                   <TransformButton onClick={() => { saveToHistory(); setTransform(p => ({ ...p, scaleX: p.scaleX * -1 })); }} icon={<FlipHorizontal />} label="水平" />
                   <TransformButton onClick={() => { saveToHistory(); setTransform(p => ({ ...p, scaleY: p.scaleY * -1 })); }} icon={<FlipVertical />} label="垂直" />
                 </div>
               </ControlSection>
-              <div className="pt-6 border-t border-slate-800 space-y-4">
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">裁剪控制</h4>
-                <button onClick={applyCrop} className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-green-900/20 active:scale-95 transition-all">
-                  <Check className="w-5 h-5" /> 执行应用裁剪
-                </button>
-              </div>
             </div>
           )}
 
-          {activeTab === 'color' && (
-            <div className="space-y-8">
-              <ControlSection title="色彩提取器">
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                  开启此面板后，直接点击左侧画布上的任意位置即可提取像素颜色值。
-                </p>
-                <div className="p-6 bg-slate-800/50 border border-slate-700/50 rounded-2xl flex flex-col items-center gap-4">
-                  <div 
-                    className="w-24 h-24 rounded-2xl shadow-inner border border-white/10 transition-colors duration-300" 
-                    style={{ backgroundColor: pickedColor || 'transparent' }} 
-                  />
-                  <div className="w-full space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-500 uppercase">当前色值</span>
-                      <span className="text-sm font-mono font-bold text-white">{pickedColor || '未选择'}</span>
+          {activeTab === 'presets' && (
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">大师滤镜模板</h4>
+              <div className="grid grid-cols-2 gap-3">
+                {FILTER_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => applyPreset(preset.values)}
+                    className="group relative flex flex-col gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-indigo-500/50 transition-all text-left"
+                  >
+                    <div className="aspect-video rounded-lg bg-slate-900 overflow-hidden relative">
+                       <img 
+                         src={image.preview} 
+                         alt={preset.name}
+                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                         style={{ filter: getFilterString(preset.values) }}
+                       />
+                       <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                       <span className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/60 backdrop-blur-sm rounded text-[8px] font-bold uppercase text-white/80">{preset.id}</span>
                     </div>
-                    <button 
-                      onClick={copyColorToClipboard}
-                      disabled={!pickedColor}
-                      className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-xs transition-all
-                        ${pickedColor 
-                          ? 'bg-indigo-600 hover:bg-indigo-500 text-white' 
-                          : 'bg-slate-700 text-slate-500 cursor-not-allowed'}
-                      `}
-                    >
-                      {copyFeedback ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      {copyFeedback ? '已复制' : '复制 HEX 代码'}
-                    </button>
-                  </div>
-                </div>
-              </ControlSection>
+                    <div>
+                      <p className="text-xs font-bold text-slate-200">{preset.name}</p>
+                      <p className="text-[9px] text-slate-500 truncate">{preset.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
           {activeTab === 'magic' && (
             <div className="space-y-6">
-              <div className="p-5 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl space-y-4">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-400" /> AI 背景重绘</h3>
-                <textarea value={bgPrompt} onChange={(e) => setBgPrompt(e.target.value)} placeholder="描述新背景..." className="w-full h-24 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors" />
-                <button onClick={replaceBackground} disabled={isMagicProcessing || !bgPrompt.trim()} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold">开始重绘</button>
+              <div className="p-4 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl space-y-4">
+                <h3 className="text-xs font-bold text-white flex items-center gap-2"><ImagePlus className="w-4 h-4 text-indigo-400" /> AI 创意生成</h3>
+                <textarea value={genPrompt} onChange={(e) => setGenPrompt(e.target.value)} placeholder="描述你想生成的全新图片..." className="w-full h-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-[11px] text-slate-200 outline-none focus:border-indigo-500 transition-colors" />
+                <button onClick={() => handleAIAction(genPrompt, 'generate')} disabled={isMagicProcessing || !genPrompt.trim()} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"><Zap className="w-3 h-3" /> 立即生成</button>
               </div>
-              <div className="p-5 bg-purple-600/10 border border-purple-500/20 rounded-2xl space-y-4">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2"><Shirt className="w-4 h-4 text-purple-400" /> AI 智能换装</h3>
-                <input value={outfitPrompt} onChange={(e) => setOutfitPrompt(e.target.value)} placeholder="描述服装，如：白色 T 恤..." className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-xs text-slate-200" />
-                <button onClick={changeOutfit} disabled={isMagicProcessing || !outfitPrompt.trim()} className="w-full py-3 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-bold">执行换装</button>
+              <div className="p-4 bg-emerald-600/10 border border-emerald-500/20 rounded-2xl space-y-4">
+                <h3 className="text-xs font-bold text-white flex items-center gap-2"><Zap className="w-4 h-4 text-emerald-400" /> AI 高清增强</h3>
+                <p className="text-[10px] text-slate-400 leading-normal">利用 Gemini 2.5 视觉模型重建丢失的细节并锐化画面。</p>
+                <button onClick={() => handleAIAction('', 'upscale')} disabled={isMagicProcessing} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold transition-all">开始增强</button>
               </div>
+              <div className="p-4 bg-purple-600/10 border border-purple-500/20 rounded-2xl space-y-4">
+                <h3 className="text-xs font-bold text-white flex items-center gap-2"><Shirt className="w-4 h-4 text-purple-400" /> AI 局部重绘</h3>
+                <textarea value={magicPrompt} onChange={(e) => setMagicPrompt(e.target.value)} placeholder="描述修改部分，如：将背景换成雪山..." className="w-full h-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-[11px] text-slate-200 outline-none focus:border-indigo-500 transition-colors" />
+                <button onClick={() => handleAIAction(magicPrompt, 'edit')} disabled={isMagicProcessing || !magicPrompt.trim()} className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-bold transition-all">执行魔法</button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'color' && (
+            <div className="space-y-6">
+              <ControlSection title="像素拾色器">
+                <div className="p-6 bg-slate-800/50 rounded-2xl flex flex-col items-center gap-4 border border-slate-700/50">
+                  <div className="w-20 h-20 rounded-2xl shadow-inner border border-white/10 transition-colors duration-300" style={{ backgroundColor: pickedColor || 'transparent' }} />
+                  <div className="w-full space-y-3">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase"><span>HEX 代码</span><span className="text-white font-mono">{pickedColor || '未选择'}</span></div>
+                    <button onClick={() => { navigator.clipboard.writeText(pickedColor || ''); setCopyFeedback(true); setTimeout(() => setCopyFeedback(false), 2000); }} disabled={!pickedColor} className="w-full py-2.5 bg-indigo-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all">
+                      {copyFeedback ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />} {copyFeedback ? '已复制' : '复制颜色代码'}
+                    </button>
+                  </div>
+                </div>
+              </ControlSection>
             </div>
           )}
 
@@ -522,37 +321,29 @@ const EditorView: React.FC<EditorViewProps> = ({ image, onClose }) => {
 };
 
 const TabButton: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; label: string }> = ({ active, onClick, icon, label }) => (
-  <button onClick={onClick} className={`flex-1 py-4 px-2 flex flex-col items-center gap-1 transition-all border-b-2 min-w-[64px] ${active ? 'bg-indigo-600/5 text-indigo-400 border-indigo-500' : 'text-slate-500 border-transparent hover:text-slate-300'}`}>
-    {React.cloneElement(icon as React.ReactElement<any>, { className: 'w-5 h-5' })}
-    <span className="text-[10px] font-bold tracking-wider">{label}</span>
+  <button onClick={onClick} className={`flex-1 py-4 px-1 flex flex-col items-center gap-1 transition-all border-b-2 ${active ? 'bg-indigo-600/5 text-indigo-400 border-indigo-500' : 'text-slate-500 border-transparent hover:text-slate-300'}`}>
+    {React.cloneElement(icon as React.ReactElement<any>, { className: 'w-4 h-4' })}
+    <span className="text-[9px] font-bold uppercase tracking-tighter">{label}</span>
   </button>
 );
 
 const ControlSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="space-y-4">
-    <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{title}</h4>
-    <div className="space-y-5">{children}</div>
+    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{title}</h4>
+    <div className="space-y-4">{children}</div>
   </div>
 );
 
 const Slider: React.FC<{ label: string; value: number; min: number; max: number; onStart?: () => void; onChange: (v: number) => void }> = ({ label, value, min, max, onStart, onChange }) => (
   <div className="space-y-2">
-    <div className="flex justify-between text-[11px] font-medium"><span className="text-slate-400">{label}</span><span className="text-indigo-400">{value}</span></div>
-    <input 
-      type="range" 
-      min={min} 
-      max={max} 
-      value={value} 
-      onMouseDown={onStart}
-      onChange={(e) => onChange(parseFloat(e.target.value))} 
-      className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
-    />
+    <div className="flex justify-between text-[10px] font-medium"><span className="text-slate-400">{label}</span><span className="text-indigo-400">{value}</span></div>
+    <input type="range" min={min} max={max} value={value} onMouseDown={onStart} onChange={(e) => onChange(parseFloat(e.target.value))} className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
   </div>
 );
 
 const TransformButton: React.FC<{ onClick: () => void; icon: React.ReactNode; label: string }> = ({ onClick, icon, label }) => (
-  <button onClick={onClick} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/30 text-slate-400 hover:text-slate-200 transition-all text-center">
-    {React.cloneElement(icon as React.ReactElement<any>, { className: 'w-5 h-5 mb-1.5' })}
+  <button onClick={onClick} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/30 text-slate-400 hover:text-slate-200 transition-all text-center group">
+    {React.cloneElement(icon as React.ReactElement<any>, { className: 'w-5 h-5 mb-1.5 group-hover:scale-110 transition-transform' })}
     <span className="text-[9px] font-bold">{label}</span>
   </button>
 );

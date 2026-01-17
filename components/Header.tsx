@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ mode, onExport, canExport, imagesCount 
   const getTitle = () => {
     switch (mode) {
       case AppMode.LIBRARY: return '图片库';
-      case AppMode.EDITOR: return '高级编辑器';
+      case AppMode.EDITOR: return 'AI Picture';
       case AppMode.BATCH: return '批量处理中心';
       default: return 'AI Picture';
     }
