@@ -1,4 +1,4 @@
-# 🎨 AI Picture - 隐私至上的 AI 本地图片编辑器
+# 🎨 AI Picture - AI 本地图片编辑器
 
 <p align="left">
   <img src="https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react" alt="React" />
