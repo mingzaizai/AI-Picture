@@ -10,12 +10,14 @@ export const DEFAULT_FILTERS: ImageFilters = {
   blur: 0,
   grayscale: 0,
   hueRotate: 0,
+  borderRadius: 0,
 };
 
 export const DEFAULT_TRANSFORM: ImageTransform = {
   rotate: 0,
   scaleX: 1,
   scaleY: 1,
+  crop: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
 export interface FilterPreset {

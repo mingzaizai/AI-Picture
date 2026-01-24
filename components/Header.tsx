@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Download, Share2, MoreHorizontal } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { AppMode } from '../types';
 
 interface HeaderProps {
@@ -34,13 +34,6 @@ const Header: React.FC<HeaderProps> = ({ mode, onExport, canExport, imagesCount 
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Move title to the button element as Lucide icons don't support it */}
-        <button className="p-2 text-slate-400 hover:text-white transition-colors" title="分享">
-          <Share2 className="w-5 h-5" />
-        </button>
-        <button className="p-2 text-slate-400 hover:text-white transition-colors" title="更多">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
         <button
           onClick={onExport}
           disabled={!canExport}

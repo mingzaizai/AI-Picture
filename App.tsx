@@ -4,20 +4,11 @@ import {
   Image as ImageIcon, 
   Layers, 
   Settings, 
-  ChevronRight, 
-  Download, 
-  Undo, 
-  Redo, 
-  Trash2, 
-  Plus, 
   Maximize2,
-  Box,
-  Wand2,
-  History
+  Box
 } from 'lucide-react';
 import { AppMode, ImageData } from './types';
 import Header from './components/Header';
-import ImageUploader from './components/ImageUploader';
 import EditorView from './components/EditorView';
 import LibraryView from './components/LibraryView';
 import BatchView from './components/BatchView';
@@ -60,17 +51,20 @@ const App: React.FC = () => {
   const selectedImage = images.find(img => img.id === selectedImageId);
 
   const handleGlobalExport = () => {
+    // 获取当前页面所有的按钮
+    const buttons = Array.from(document.querySelectorAll('button'));
+    
     if (mode === AppMode.EDITOR) {
-      // 通过模拟点击编辑器内的保存按钮
-      const saveBtn = document.querySelector('button[title="导出图片"]') as HTMLButtonElement;
+      // 查找包含“导出图片”文字的按钮
+      const saveBtn = buttons.find(b => b.textContent?.includes('导出图片'));
       if (saveBtn) saveBtn.click();
     } else if (mode === AppMode.BATCH) {
-      // 提示用户在批量面板操作
-      const batchDownloadBtn = document.querySelector('button:contains("下载所有结果")') as HTMLButtonElement;
+      // 查找包含“下载所有”文字的按钮
+      const batchDownloadBtn = buttons.find(b => b.textContent?.includes('下载所有'));
       if (batchDownloadBtn) {
         batchDownloadBtn.click();
       } else {
-        alert("请先点击'开始批量执行'以生成结果。");
+        alert("请先点击右下角的 '开始执行' 以生成结果。");
       }
     } else if (mode === AppMode.LIBRARY) {
       alert("请进入编辑模式或批量模式进行导出。");
@@ -79,12 +73,8 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-[#0f172a] overflow-hidden text-slate-200">
-      <aside className="w-16 md:w-20 border-r border-slate-800 flex flex-col items-center py-6 bg-[#0a0f1d] shrink-0">
-        <div className="mb-8 p-2 bg-indigo-600 rounded-xl">
-          <Maximize2 className="w-6 h-6 text-white" />
-        </div>
-        
-        <nav className="flex flex-col gap-6">
+      <aside className="w-16 md:w-20 border-r border-slate-800 flex flex-col items-center py-8 bg-[#0a0f1d] shrink-0">
+        <nav className="flex flex-col gap-8">
           <NavButton 
             active={mode === AppMode.LIBRARY} 
             icon={<ImageIcon />} 
@@ -109,7 +99,7 @@ const App: React.FC = () => {
           />
         </nav>
 
-        <div className="mt-auto flex flex-col gap-6">
+        <div className="mt-auto flex flex-col gap-8">
           <NavButton 
             active={mode === AppMode.SETTINGS}
             icon={<Settings />} 

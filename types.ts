@@ -18,12 +18,20 @@ export interface ImageFilters {
   blur: number;
   grayscale: number;
   hueRotate: number;
+  borderRadius: number;
 }
 
 export interface ImageTransform {
   rotate: number;
   scaleX: number;
   scaleY: number;
+  // 剪切范围：相对于原图尺寸的百分比 (0-100)
+  crop: {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+  };
 }
 
 export enum AppMode {

@@ -1,6 +1,6 @@
 
-import React, { useRef } from 'react';
-import { FilePlus, Trash2, Calendar, FileText, LayoutGrid, List } from 'lucide-react';
+import React from 'react';
+import { FilePlus, Trash2 } from 'lucide-react';
 import { ImageData } from '../types';
 import ImageUploader from './ImageUploader';
 
@@ -34,9 +34,6 @@ const LibraryView: React.FC<LibraryViewProps> = ({ images, onSelect, onRemove, o
               </button>
               <button className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white pb-1 border-b-2 border-transparent">
                 最近使用
-              </button>
-              <button className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white pb-1 border-b-2 border-transparent">
-                我的收藏
               </button>
             </div>
             
