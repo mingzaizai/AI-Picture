@@ -5,13 +5,15 @@ import {
   Layers, 
   Settings, 
   Maximize2,
-  Box
+  Box,
+  Combine
 } from 'lucide-react';
 import { AppMode, ImageData } from './types';
 import Header from './components/Header';
 import EditorView from './components/EditorView';
 import LibraryView from './components/LibraryView';
 import BatchView from './components/BatchView';
+import MergeView from './components/MergeView';
 import SettingsView from './components/SettingsView';
 
 const App: React.FC = () => {
@@ -51,23 +53,23 @@ const App: React.FC = () => {
   const selectedImage = images.find(img => img.id === selectedImageId);
 
   const handleGlobalExport = () => {
-    // 获取当前页面所有的按钮
     const buttons = Array.from(document.querySelectorAll('button'));
     
     if (mode === AppMode.EDITOR) {
-      // 查找包含“导出图片”文字的按钮
       const saveBtn = buttons.find(b => b.textContent?.includes('导出图片'));
       if (saveBtn) saveBtn.click();
     } else if (mode === AppMode.BATCH) {
-      // 查找包含“下载所有”文字的按钮
       const batchDownloadBtn = buttons.find(b => b.textContent?.includes('下载所有'));
       if (batchDownloadBtn) {
         batchDownloadBtn.click();
       } else {
         alert("请先点击右下角的 '开始执行' 以生成结果。");
       }
+    } else if (mode === AppMode.MERGE) {
+      const mergeExportBtn = buttons.find(b => b.textContent?.includes('导出合并结果'));
+      if (mergeExportBtn) mergeExportBtn.click();
     } else if (mode === AppMode.LIBRARY) {
-      alert("请进入编辑模式或批量模式进行导出。");
+      alert("请进入编辑模式、批量模式或合并模式进行导出。");
     }
   };
 
@@ -90,6 +92,12 @@ const App: React.FC = () => {
               else alert('请先选择一张图片');
             }} 
             disabled={!selectedImageId}
+          />
+          <NavButton 
+            active={mode === AppMode.MERGE} 
+            icon={<Combine />} 
+            label="合并" 
+            onClick={() => setMode(AppMode.MERGE)} 
           />
           <NavButton 
             active={mode === AppMode.BATCH} 
@@ -141,6 +149,13 @@ const App: React.FC = () => {
             <BatchView 
               images={images} 
               onRemove={removeImage}
+              onUpload={handleUpload}
+            />
+          )}
+
+          {mode === AppMode.MERGE && (
+            <MergeView 
+              images={images}
               onUpload={handleUpload}
             />
           )}

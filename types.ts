@@ -9,6 +9,17 @@ export interface ImageData {
   size: number;
 }
 
+export interface TextOverlay {
+  id: string;
+  text: string;
+  x: number; // 0-100 percentage
+  y: number; // 0-100 percentage
+  fontSize: number;
+  color: string;
+  rotation: number; // 0-360
+  fontWeight: string;
+}
+
 export interface ImageFilters {
   brightness: number;
   contrast: number;
@@ -38,10 +49,12 @@ export enum AppMode {
   LIBRARY = 'LIBRARY',
   EDITOR = 'EDITOR',
   BATCH = 'BATCH',
+  MERGE = 'MERGE',
   SETTINGS = 'SETTINGS'
 }
 
 export interface ProcessingHistory {
   filters: ImageFilters;
   transform: ImageTransform;
+  texts: TextOverlay[];
 }

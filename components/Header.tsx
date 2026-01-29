@@ -16,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({ mode, onExport, canExport, imagesCount 
       case AppMode.LIBRARY: return '图片库';
       case AppMode.EDITOR: return 'AI Picture';
       case AppMode.BATCH: return '批量处理中心';
+      case AppMode.MERGE: return '拼图合并中心';
       default: return 'AI Picture';
     }
   };
